@@ -1,0 +1,14 @@
+==26659== Memcheck, a memory error detector
+==26659== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
+==26659== Using Valgrind-3.20.0 and LibVEX; rerun with -h for copyright info
+==26659== Command: ./tema1 2 1 test_mare.txt
+==26659== Parent PID: 196
+==26659== 
+==26659== 
+==26659== HEAP SUMMARY:
+==26659==     in use at exit: 0 bytes in 0 blocks
+==26659==   total heap usage: 990,272 allocs, 990,272 frees, 336,741,707 bytes allocated
+==26659== 
+==26659== All heap blocks were freed -- no leaks are possible
+==26659== 
+==26659== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)

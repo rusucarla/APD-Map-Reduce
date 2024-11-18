@@ -1,0 +1,52 @@
+Mon Nov 18 22:00:50 EET 2024
+total 48K
+-rw-r--r-- 1 carla1 carla1  130 Nov 18 21:00 Makefile
+-rwxr-xr-x 1 carla1 carla1  17K Nov 17 16:43 main
+-rw-r--r-- 1 carla1 carla1 7.6K Nov 18 20:11 main.c
+-rw-r--r-- 1 carla1 carla1  13K Nov 18 21:42 main.cpp
+-rw-r--r-- 1 carla1 carla1    0 Nov 17 20:42 output.txt
+Se ruleaza varianta cu M=1 si R=1...
+Rularea a durat 2.29 secunde
+OK
+
+Se ruleaza varianta cu M=1 si R=2...
+Rularea a durat 2.00 secunde
+OK
+
+Se ruleaza varianta cu M=1 si R=4...
+Rularea a durat 1.92 secunde
+OK
+
+Se ruleaza varianta cu M=2 si R=1...
+Rularea a durat 1.49 secunde
+OK
+
+Se ruleaza varianta cu M=2 si R=2...
+Rularea a durat 1.20 secunde
+OK
+
+Se ruleaza varianta cu M=2 si R=4...
+Rularea a durat 1.16 secunde
+Acceleratie: 1.97
+OK
+
+Se ruleaza varianta cu M=4 si R=1...
+Rularea a durat 1.09 secunde
+OK
+
+Se ruleaza varianta cu M=4 si R=2...
+Rularea a durat 0.82 secunde
+Acceleratie: 2.79
+OK
+
+Se ruleaza varianta cu M=4 si R=4...
+Rularea a durat 0.76 secunde
+Acceleratie: 3.01
+OK
+
+==========================
+
+
+Scalabilitate: 48/48
+Corectitudine: 36/36
+Total:       84/84
