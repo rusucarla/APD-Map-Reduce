@@ -8,6 +8,8 @@ Pentru diagramele din acest README, am folosit [Mermaid Live
 Editor](https://mermaid-js.github.io/mermaid-live-editor/) si ghidul [Mermaid
 Docs](https://mermaid.js.org/intro/).
 
+Am scris poate prea mult, dar am vrut sa explic cat mai bine.
+
 ## De ce am folosit C++?
 
 Pentru ca este mai usor de lucrat cu thread-uri in C++ decat in C, chiar si cu
@@ -17,16 +19,26 @@ pthreads.
 
 ```mermaid
 sequenceDiagram
-    participant Main
-    participant MapperThread
-    participant ReducerThread
+  participant Main
+  participant MapperThread
+  participant Barrier
+  participant ReducerThread
 
-    Main->>MapperThread: Creez M Mappers
-    MapperThread-->>MapperThread: Procesez datele din fisiere
-    MapperThread-->>Main: Revin cu datele procesate
-    Main->>ReducerThread: Creez R Reducers
-    ReducerThread-->>ReducerThread: Rezultatele sunt agregate
-    ReducerThread-->>Main: Generez output-urile finale
+  Main->>Main: Creez M Mapper si R Reducer
+
+  Main->>MapperThread: Pornesc thread-urile Mapper
+  Main->>ReducerThread: Pornesc thread-urile Reducer
+
+  ReducerThread->>Barrier: Astept la bariera
+  MapperThread-->>MapperThread: Procesez datele din fisiere
+  MapperThread->>Barrier: Astept la bariera
+  Note over MapperThread, ReducerThread: Toate thread-urile ajung la bariera
+  Barrier-->>MapperThread: Trec de bariera
+  Barrier-->>ReducerThread: Trec de bariera
+  ReducerThread-->>ReducerThread: Rezultatele sunt agregate
+  ReducerThread-->>ReducerThread: Generez output-urile finale
+
+  Main->>Main: Astept ca toate thread-urile sa termine si distrug bariera  
 ```
 
 ## Metodele de sincronizare
@@ -50,9 +62,19 @@ sequenceDiagram
 
 ### Intre Mapper si Reducer
 
-Am folosit o bariera pentru a sincroniza Mapper-ii cu Reducer-ii. Cand toti
-Mapper-ii au terminat de procesat datele, acestia asteapta ca toti Reducer-ii sa
-isi termine procesarea datelor intermediare.
+Am folosit `pthread_barrier_t` pentru a sincroniza Mapper-ii si Reducer-ii.
+Reducer-ii asteapta la bariera pana cand toti Mapper-ii au terminat de procesat
+datele. Semnaland bariera la inceputul functiei `reducer` si la finalul functiei
+`mapper` putem asigura acest lucru.
+
+### Intre Reducer si scrierea in fisiere
+
+Pentru reducer am decis sa impart alfabetul _echitabil_ pentru fiecare Reducer.
+Calculul este facut in functia `get_reducer_id` si este folosit pentru a decide
+inca de la inceput (din `mapper`) ce Reducer va procesa ce litera. Am presupus ca
+pentru un test cu foarte multe cuvinte, numarul de cuvinte pentru fiecare litera
+ar trebui sa fie cat de cat egal, astfel incat sa nu avem un Reducer care sa
+proceseze mult mai multe cuvinte decat altul.
 
 ## Structura Map-Reduce
 
@@ -68,12 +90,14 @@ classDiagram
         int total_files
         int mapper_id
         int num_reducers
+        pthread_barrier_t* barrier
     }
     class ReducerArgs {
         const std::vector<MapperArgs>* mapper_args
         int reducer_id
         int num_reducers
         int num_mappers
+        pthread_barrier_t* barrier
     }
     class MapperThread {
         void* mapper(void* args)
@@ -85,11 +109,14 @@ classDiagram
     ReducerThread --> ReducerArgs
     MapperArgs  -->  partial_results : contine
     ReducerArgs  -->  MapperArgs : acceseaza
+    MapperArgs --> Barrier : asteapta dupa prelucrare
+    ReducerArgs --> Barrier : asteapta prelucrarile
 ```
 
 ## Exemplu de rulare pentru test_small.txt
 
-O sa zicem ca avem M = 2 Mapper si R = 2 Reducer.
+O sa zicem ca avem M = 2 Mapper si R = 2 Reducer. In plus, am ignorat existenta
+barierei pentru a simplifica exemplul.
 
 Asemenea cerintei, am ales ca M0 sa preia file1.txt, iar M1 sa preia file2.txt
 si file3.txt.
@@ -256,8 +283,8 @@ Agregate, ele arata asa inainte de a fi ordonate :
 | are    | {1}      | 1     |
 | ...    | ...      | ...   |
 
-(Nu am mai avut rabdare sa scriu tot tabelul, dar arata continua tot asa dar
-doar cu cuvintele care apar intr-un singur fisier)
+(Nu am mai avut rabdare sa scriu tot tabelul, dar continua cu cuvintele care
+apar o singura data)
 
 Acum acest tabel, care se afla in `combined_results` va fi ordonat in
 `sorted_results`.
@@ -317,8 +344,8 @@ Agregate, ele arata asa inainte de a fi ordonate :
 | shines | {1}      | 1     |
 | ...    | ...      | ...   |
 
-(Nu am mai avut rabdare sa scriu tot tabelul, dar arata continua tot asa dar
-doar cu cuvintele care apar intr-un singur fisier)
+(Nu am mai avut rabdare sa scriu tot tabelul, dar continua cu cuvintele care
+apar o singura data)
 
 Acum acest tabel, care se afla in `combined_results` va fi ordonat in
 `sorted_results`. Crtieriile de ordonare sunt aceleasi pentru orice reducer.

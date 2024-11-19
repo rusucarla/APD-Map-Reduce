@@ -106,6 +106,7 @@ void *mapper(void *args) {
             }
         }
     }
+    // Signal that this mapper has finished
     // Wait for all mappers to finish
     pthread_barrier_wait(mapper_args->barrier);
     return nullptr;
@@ -113,8 +114,10 @@ void *mapper(void *args) {
 
 void *reducer(void *args) {
     auto *reducer_args = static_cast<ReducerArgs *>(args);
-    // Wait for mapper threads to finish
+    // We signal that the reducer has started
+    // Still need to wait for all mappers to finish
     pthread_barrier_wait(reducer_args->barrier);
+    // If we reached this point, all mappers have finished
     const auto &mapper_args = *(reducer_args->mapper_args);
     int reducer_id = reducer_args->reducer_id;
     int num_mappers = reducer_args->num_mappers;
@@ -197,9 +200,14 @@ int main(int argc, char **argv) {
         infile >> files[i];
     }
     pthread_barrier_t barrier;
-    // Barrier to synchronize between mappers and reducers, with a count of
-    // num_mappers + num_reducers
+    // Barrier to synchronize between mappers and reducers
     pthread_barrier_init(&barrier, nullptr, num_mappers + num_reducers);
+    
+    // ----INITIALIZATION----
+    // Separated the intialization of all threads and arguments to make it easier to read
+    
+    // ----MAPPER THREADS----
+
     // We have a vector of partial results for each mapper, chose 26 because of
     // the alphabet size (26 letters) => each mapper will produce a partial alphabet
     std::vector<std::map<std::string, std::set<int>>> partial_results(26);
@@ -224,9 +232,10 @@ int main(int argc, char **argv) {
     // Create mapper threads
     for (int i = 0; i < num_mappers; ++i) {
         pthread_create(&mapper_threads[i], nullptr, mapper, &mapper_args[i]);
-    }   
-    // We'll have a barrier between mappers and reducers, thanks to the join
-    // above
+    } 
+
+    // ----REDUCER THREADS----
+    
     // Initialize reducer arguments
     std::vector<pthread_t> reducer_threads(num_reducers);
     std::vector<ReducerArgs> reducer_args(num_reducers);
@@ -244,6 +253,9 @@ int main(int argc, char **argv) {
     for (int i = 0; i < num_reducers; ++i) {
         pthread_create(&reducer_threads[i], nullptr, reducer, &reducer_args[i]);
     }
+
+    // ----WAIT FOR THREADS TO FINISH----
+    
     // Wait for mapper threads to finish
     for (int i = 0; i < num_mappers; ++i) {
         pthread_join(mapper_threads[i], nullptr);

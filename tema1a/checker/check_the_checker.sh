@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Define the checker script and output directory
 CHECKER_SCRIPT="./checker.sh"  
 OUTPUT_DIR="./output_files"   
 
