@@ -50,12 +50,9 @@ sequenceDiagram
 
 ### Intre Mapper si Reducer
 
-Pentru a ma asigura ca thread-urile din Reducer nu incep sa agregheze datele
-inainte ca toate thread-urile Mapper sa fi terminat de procesat datele, am ales
-sa nu creez thread-urile Reducer decat dupa ce toate thread-urile Mapper au fost incheiate.
-
-Diagrama de mai sus arata ca MapperThread-urile se termina inainte ca
-ReducerThread-urile sa fie create.
+Am folosit o bariera pentru a sincroniza Mapper-ii cu Reducer-ii. Cand toti
+Mapper-ii au terminat de procesat datele, acestia asteapta ca toti Reducer-ii sa
+isi termine procesarea datelor intermediare.
 
 ## Structura Map-Reduce
 
