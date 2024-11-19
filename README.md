@@ -2,11 +2,13 @@
 
 ## Descriere
 
-Am realizat o implementare a unui Map-Reduce folosind thread-uri în C++.
+Am realizat o implementare a unui Map-Reduce folosind thread-uri in C++.
 
 Pentru diagramele din acest README, am folosit [Mermaid Live
 Editor](https://mermaid-js.github.io/mermaid-live-editor/) si ghidul [Mermaid
-Docs](https://mermaid.js.org/intro/).
+Docs](https://mermaid.js.org/intro/). O varianta pentru a vedea diagramele
+Mermaid (nu doar codul) ar fi [acleasi README dar
+pe Notion](https://carla-upb.notion.site/readme-apd-1a?pvs=4).
 
 Am scris poate prea mult, dar am vrut sa explic cat mai bine.
 
